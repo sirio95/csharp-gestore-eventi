@@ -1,10 +1,13 @@
-﻿namespace csharp_gestore_eventi
+﻿using System.Linq;
+
+namespace csharp_gestore_eventi
 {
     internal class Program
     {
         static void Main(string[] args)
         {
             Evento nuovoEvento = CreaEvento();       
+
         }
         public static Evento CreaEvento()
         {
@@ -61,6 +64,7 @@
 
 
         }
+
     }
     public class Evento
     {
@@ -165,6 +169,81 @@
             Console.WriteLine($"Posti Liberi: {this.MaxCapacity - this.Reserved}");
         }
     }
+    public class ProgrammaEventi
+    {
+        private string _titolo;
+        public string Titolo
+        {
+            get { return _titolo; }
+            set 
+            {
+                if (value != null && value != "")
+                    _titolo = value;
+                else
+                    throw new Exception("Devi NECESSARIAMENTE specificare il titolo");
+            }
+        }
 
+        public List<Evento> ListaEventi { get; set; }
+
+        public ProgrammaEventi(string titolo) 
+        { 
+            _titolo = titolo;
+            ListaEventi = new List<Evento>();
+        }
+
+        public void AddEvento(Evento ev)
+        {
+            this.ListaEventi.Add(ev);
+        }
+        public void EventoPerData()
+        {
+            Console.WriteLine("Digita una data (gg/MM/yyyy) per visualizzare tutti gli eventi previsti per quella data: ");
+            
+            //parametri ricerca
+            DateTime dateFilter;
+            DateTime todayDate = DateTime.Now;
+            while( DateTime.TryParse(Console.ReadLine(), out dateFilter))
+                Console.WriteLine("Digita una data nel formato valido");
+            
+            //stampa a schermo eventi
+            foreach (Evento ev in ListaEventi)
+            {
+                if(ev.Date == dateFilter)
+                    Console.WriteLine($"Evento {ListaEventi.IndexOf(ev)} - {ev.ToString()}");
+            }
+        }
+        public static void StampaTuttiEventiStatic(List<Evento> ListaEventi)
+        {
+            foreach(Evento ev in ListaEventi)
+                Console.WriteLine($"Evento {ListaEventi.IndexOf(ev)} - {ev.Titolo} - {ev.Date}");
+        }
+        public void EventiAttuali()
+        {
+            DateTime today = DateTime.Now;
+
+            var eventoAttuale = from evento in ListaEventi 
+                                         where evento.Date == today
+                                         select evento;
+            foreach (var evat in eventoAttuale)
+            {
+                evat.ToString();
+            }
+            
+        }
+
+        public void StampaTuttiEventi()
+        {
+            Console.WriteLine(this.Titolo);
+            foreach (Evento ev in ListaEventi)
+                Console.WriteLine($"Evento {ListaEventi.IndexOf(ev)} - {ev.ToString()}");
+        }
+
+        public void SvuotaLista()
+        {
+            this.ListaEventi.Clear();
+        }
+
+    }
 
 }
