@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Globalization;
+using System.Linq;
 
 namespace csharp_gestore_eventi
 {
@@ -6,7 +8,23 @@ namespace csharp_gestore_eventi
     {
         static void Main(string[] args)
         {
-            Evento nuovoEvento = CreaEvento();       
+            ProgrammaEventi nuovoEvento = CreaProgrammaEventi();
+            
+
+
+            //dati di debug
+            //Evento evento1 = new Evento("Coffee Vincit Omnia", "29/05/2023");
+            //Evento evento2 = new Evento("Coffee Caput Mundi", "29/05/2023");
+            //Evento evento3 = new Evento("Coffee Stupor Mundi", "30/05/2023");
+            //Evento evento4 = new Evento("Coffee In Anno Licere", "30/05/2023");
+
+            //ProgrammaEventi CoffeeWorldCup = new ProgrammaEventi("Coffee World Cup");
+            //CoffeeWorldCup.AddEvento(evento1);
+            //CoffeeWorldCup.AddEvento(evento2);
+            //CoffeeWorldCup.AddEvento(evento3);
+            //CoffeeWorldCup.AddEvento(evento4);
+
+            //CoffeeWorldCup.EventoPerData();
 
         }
         public static Evento CreaEvento()
@@ -15,13 +33,17 @@ namespace csharp_gestore_eventi
             Console.WriteLine("Inserisci il nome dell'evento: ");
             string title = Console.ReadLine();
             while(title == "" || title == null)
+            {
                 Console.WriteLine("Inserisci un titolo valido");
+                title = Console.ReadLine();
+            }
+                
 
             //data evento
             Console.WriteLine("Indica la data dell'evento (gg/MM/yyyy): ");
             DateTime date;
-            while (!DateTime.TryParse(Console.ReadLine(), out date))
-                Console.WriteLine("Inserisci una data valida nel formato indicato");
+            while (!DateTime.TryParse(Console.ReadLine(), out date) || date<DateTime.Now)
+                Console.WriteLine("Inserisci una data valida nel formato indicato (date passate non sono valide)");
             string eventDate = date.ToString();
 
             //posti evento
@@ -33,8 +55,8 @@ namespace csharp_gestore_eventi
             //prenotazioni evento
             Console.WriteLine("Indica quanti posti desideri prenotare: ");
             int reserved;
-            while (!int.TryParse(Console.ReadLine(), out reserved))
-                Console.WriteLine("Inserisci un numero valido");
+            while (!int.TryParse(Console.ReadLine(), out reserved) || reserved>capacity)
+                Console.WriteLine("Inserisci un numero valido (ricorda: non puoi prenotare più posti di quanti non ne siano disponibili)");
 
 
             //creazione evento
@@ -63,6 +85,33 @@ namespace csharp_gestore_eventi
             return nomeEvento;
 
 
+        }
+
+        public static ProgrammaEventi CreaProgrammaEventi()
+        {
+            Console.WriteLine("Come vuoi che si chiami il tuo programma?");
+            string title = Console.ReadLine();
+            while (title == "" || title == null)
+            {
+                Console.WriteLine("Inserisci un titolo valido");
+                title = Console.ReadLine();
+            }
+                
+
+            ProgrammaEventi nuovoProgramma= new ProgrammaEventi(title);
+            Console.WriteLine($"Di quanti eventi si comporrà {title}?");
+
+            int numEventi;
+            while (!int.TryParse(Console.ReadLine(), out numEventi) || numEventi<=0)
+                Console.WriteLine("inserisci un numero valido e ricorda: un programma non può avere meno di zero eventi.");
+
+            for(int i=0; i<numEventi+1; i++)
+            {
+                Evento nuovoEvento = CreaEvento();
+                nuovoProgramma.AddEvento(nuovoEvento);
+            }
+            
+            return nuovoProgramma;
         }
 
     }
@@ -144,10 +193,8 @@ namespace csharp_gestore_eventi
             Console.Write("Indica il numero di prenotazioni da cancellare: ");
 
             int posti;
-            while (!int.TryParse(Console.ReadLine(), out posti))
-                Console.WriteLine("Inserisci un numero valido");
-            while (posti > this.Reserved)
-                Console.WriteLine("Non puoi cancellare più prenotazioni di quelle attualmente attive");
+            while (!int.TryParse(Console.ReadLine(), out posti) || posti > this.Reserved)
+                Console.WriteLine("Inserisci un numero valido (e ricorda: non puoi cancellare più prenotazioni di quelle attive)");
 
             Console.WriteLine($"Posti disponibili: {this.MaxCapacity - (this.Reserved - posti)}");
             Console.WriteLine($"Posti prenotati: {this.Reserved - posti}");
@@ -199,19 +246,32 @@ namespace csharp_gestore_eventi
         public void EventoPerData()
         {
             Console.WriteLine("Digita una data (gg/MM/yyyy) per visualizzare tutti gli eventi previsti per quella data: ");
-            
+
             //parametri ricerca
             DateTime dateFilter;
-            DateTime todayDate = DateTime.Now;
-            while( DateTime.TryParse(Console.ReadLine(), out dateFilter))
+            
+            while (!DateTime.TryParse(Console.ReadLine(), out dateFilter))
                 Console.WriteLine("Digita una data nel formato valido");
+
             
             //stampa a schermo eventi
-            foreach (Evento ev in ListaEventi)
+            var eventoPerData = from evento in ListaEventi
+                                where evento.Date == dateFilter
+                                select evento;
+
+            if(eventoPerData.Count() == 0)
             {
-                if(ev.Date == dateFilter)
-                    Console.WriteLine($"Evento {ListaEventi.IndexOf(ev)} - {ev.ToString()}");
+                Console.WriteLine($"Ci dispiace ma non ci sono eventi il {dateFilter.ToString()}");
             }
+            else
+            {
+                foreach (var evat in eventoPerData)
+                {
+                    Console.WriteLine(evat.ToString());
+                }
+            }
+
+
         }
         public static void StampaTuttiEventiStatic(List<Evento> ListaEventi)
         {
@@ -225,10 +285,19 @@ namespace csharp_gestore_eventi
             var eventoAttuale = from evento in ListaEventi 
                                          where evento.Date == today
                                          select evento;
-            foreach (var evat in eventoAttuale)
+
+            if(eventoAttuale== null)
             {
-                evat.ToString();
+                Console.WriteLine($"Ci dispiace ma nessuno evento è previsto per {today.ToString()}");
             }
+            else
+            {
+                foreach (var evat in eventoAttuale)
+                {
+                    Console.WriteLine(evat.ToString());
+                }
+            }
+            
             
         }
 
