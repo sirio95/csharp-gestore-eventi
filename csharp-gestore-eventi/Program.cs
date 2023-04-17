@@ -23,6 +23,8 @@ namespace csharp_gestore_eventi
             //svuotamento lista eventi
             nuovoEvento.SvuotaLista();
 
+
+
             //dati di debug
             //Evento evento1 = new Evento("Coffee Vincit Omnia", "29/05/2023");
             //Evento evento2 = new Evento("Coffee Caput Mundi", "29/05/2023");
@@ -164,20 +166,20 @@ namespace csharp_gestore_eventi
             }
 
 
-            //data evento
+            //data conferenza
             Console.WriteLine("Indica la data della conferenza (gg/MM/yyyy): ");
             DateTime date;
             while (!DateTime.TryParse(Console.ReadLine(), out date) || date < DateTime.Now)
                 Console.WriteLine("Inserisci una data valida nel formato indicato (date passate non sono valide)");
             string conferenceDate = date.ToString();
 
-            //posti evento
+            //posti conferenza
             Console.WriteLine("Indica la capienza di posti della conferenza: ");
             int capacity;
             while (!int.TryParse(Console.ReadLine(), out capacity))
                 Console.WriteLine("Inserisci un numero valido");
 
-            //prenotazioni evento
+            //prenotazioni conferenza
             Console.WriteLine("Indica quanti posti desideri prenotare: ");
             int reserved;
             while (!int.TryParse(Console.ReadLine(), out reserved) || reserved > capacity)
@@ -388,7 +390,7 @@ namespace csharp_gestore_eventi
         public static void StampaTuttiEventiStatic(List<Evento> ListaEventi)
         {
             foreach(Evento ev in ListaEventi)
-                Console.WriteLine($"Evento {ListaEventi.IndexOf(ev) + 1} - {ev.ToString}");
+                Console.WriteLine($"Evento {ListaEventi.IndexOf(ev) + 1} - {ev.ToString()}");
         }
         public void EventiAttuali()
         {
