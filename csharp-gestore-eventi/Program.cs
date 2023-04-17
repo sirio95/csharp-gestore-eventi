@@ -8,13 +8,19 @@ namespace csharp_gestore_eventi
     {
         static void Main(string[] args)
         {
+            //creazione programma
             ProgrammaEventi nuovoEvento = CreaProgrammaEventi();
 
+            //numero eventi in programma
             Console.WriteLine($"In totale, il programma prevede {nuovoEvento.ListaEventi.Count()} eventi");
 
+            // tutti gli eventi in programma
             ProgrammaEventi.StampaTuttiEventiStatic(nuovoEvento.ListaEventi);
-            ProgrammaEventi.StampaTuttiEventiStatic(nuovoEvento.ListaEventoPerData());.
 
+            //tutti gli eventi in programma in una data chiesta all'utente
+            ProgrammaEventi.StampaTuttiEventiStatic(nuovoEvento.ListaEventoPerData());
+
+            //svuotamento lista eventi
             nuovoEvento.SvuotaLista();
 
             //dati di debug
@@ -31,6 +37,62 @@ namespace csharp_gestore_eventi
 
             //CoffeeWorldCup.EventoPerData();
 
+        }
+        public static ProgrammaEventi CreaProgrammaEventi()
+        {
+            //titolo programma
+            Console.WriteLine("Come vuoi che si chiami il tuo programma?");
+            string title = Console.ReadLine();
+            while (title == "" || title == null)
+            {
+                Console.WriteLine("Inserisci un titolo valido");
+                title = Console.ReadLine();
+            }
+
+            //creazione programma
+            ProgrammaEventi nuovoProgramma = new ProgrammaEventi(title);
+            Console.WriteLine($"Di quanti eventi si comporrà {title}?");
+
+            //inserimento eventi per programma
+            int numEventi;
+            while (!int.TryParse(Console.ReadLine(), out numEventi) || numEventi <= 0)
+                Console.WriteLine("inserisci un numero valido e ricorda: un programma non può avere meno di zero eventi.");
+
+            for (int i = 0; i < numEventi; i++)
+            {
+                Evento nuovoEvento = CreaEvento();
+                nuovoProgramma.AddEvento(nuovoEvento);
+            }
+
+
+            // aggiunta conferenze
+
+            Console.WriteLine("Vuoi inserire delle conferenze? (si/no)");
+
+            string conferenza = Console.ReadLine();
+            while ((conferenza == "" || conferenza == null) || (conferenza != "si" && conferenza != "no"))
+            {
+                Console.WriteLine("Rispsta non valida");
+                conferenza = Console.ReadLine();
+            }
+            if (conferenza == "no") 
+            {
+                return nuovoProgramma;
+            }
+            else
+            {
+                Console.WriteLine("Indica il numero di conferenze da inserire in programma");
+                int conferenze;
+                while(!int.TryParse(Console.ReadLine(), out conferenze) || conferenze <0)
+                    Console.WriteLine("Inserisci un numero valido. Ricorda, non puoi creare un numero negativo di conferenze");
+
+                for (int i=0; i< conferenze; i++)
+                {
+                    Conferenza nuovaConferenza = CreaConferenza();
+                    nuovoProgramma.AddEvento(nuovaConferenza);
+                }
+                return nuovoProgramma;
+            }
         }
         public static Evento CreaEvento()
         {
@@ -86,38 +148,81 @@ namespace csharp_gestore_eventi
                 
             }
 
-
             return nomeEvento;
 
 
         }
 
-        public static ProgrammaEventi CreaProgrammaEventi()
+        public static Conferenza CreaConferenza()
         {
-            Console.WriteLine("Come vuoi che si chiami il tuo programma?");
+            Console.WriteLine("Inserisci il nome della conferenza: ");
             string title = Console.ReadLine();
             while (title == "" || title == null)
             {
                 Console.WriteLine("Inserisci un titolo valido");
                 title = Console.ReadLine();
             }
-                
 
-            ProgrammaEventi nuovoProgramma= new ProgrammaEventi(title);
-            Console.WriteLine($"Di quanti eventi si comporrà {title}?");
 
-            int numEventi;
-            while (!int.TryParse(Console.ReadLine(), out numEventi) || numEventi<=0)
-                Console.WriteLine("inserisci un numero valido e ricorda: un programma non può avere meno di zero eventi.");
+            //data evento
+            Console.WriteLine("Indica la data della conferenza (gg/MM/yyyy): ");
+            DateTime date;
+            while (!DateTime.TryParse(Console.ReadLine(), out date) || date < DateTime.Now)
+                Console.WriteLine("Inserisci una data valida nel formato indicato (date passate non sono valide)");
+            string conferenceDate = date.ToString();
 
-            for(int i=0; i<numEventi+1; i++)
+            //posti evento
+            Console.WriteLine("Indica la capienza di posti della conferenza: ");
+            int capacity;
+            while (!int.TryParse(Console.ReadLine(), out capacity))
+                Console.WriteLine("Inserisci un numero valido");
+
+            //prenotazioni evento
+            Console.WriteLine("Indica quanti posti desideri prenotare: ");
+            int reserved;
+            while (!int.TryParse(Console.ReadLine(), out reserved) || reserved > capacity)
+                Console.WriteLine("Inserisci un numero valido (ricorda: non puoi prenotare più posti di quanti non ne siano disponibili)");
+
+            // dati conferenza
+
+            Console.WriteLine("Indica il relatore della conferenza");
+            string relatore = Console.ReadLine();
+            while (relatore == "" || relatore == null || !relatore.Contains(" "))
             {
-                Evento nuovoEvento = CreaEvento();
-                nuovoProgramma.AddEvento(nuovoEvento);
+                Console.WriteLine("Inserisci un relatore valido. Ricorda di indicare sia nome che cognome");
+                relatore = Console.ReadLine();
             }
-            
-            return nuovoProgramma;
+            double price;
+            while (!double.TryParse(Console.ReadLine(), out price))
+                Console.WriteLine("Inserisci un prezzo valido");
+
+            //creazione conferenza
+
+            Conferenza nuovaConferenza = new Conferenza(relatore, price, title, conferenceDate);
+            nuovaConferenza.MaxCapacity = capacity;
+            nuovaConferenza.Reserved = reserved;
+
+            nuovaConferenza.StampaPosti();
+            string postiLoop = "si";
+
+            // modifica prenotazioni conferenza
+
+            while (postiLoop == "si")
+            {
+                Console.WriteLine("Vuoi disdire dei posti(si/no)?");
+
+                postiLoop = Console.ReadLine();
+                if (postiLoop == "no")
+                    break;
+                while (postiLoop != "si" && postiLoop != "no")
+                    Console.WriteLine("Comando non valido");
+                nuovaConferenza.DisdiciPosti();
+
+            }
+            return nuovaConferenza;
         }
+
+        
 
     }
     public class Evento
@@ -211,7 +316,7 @@ namespace csharp_gestore_eventi
         public override string ToString()
         {
             string date = this.Date.ToString("dd/MM/yyyy");
-            return date + " " + this.Titolo;
+            return date + " - " + this.Titolo;
         }
 
         public void StampaPosti()
@@ -283,7 +388,7 @@ namespace csharp_gestore_eventi
         public static void StampaTuttiEventiStatic(List<Evento> ListaEventi)
         {
             foreach(Evento ev in ListaEventi)
-                Console.WriteLine($"Evento {ListaEventi.IndexOf(ev)} - {ev.Titolo} - {ev.Date}");
+                Console.WriteLine($"Evento {ListaEventi.IndexOf(ev) + 1} - {ev.ToString}");
         }
         public void EventiAttuali()
         {
@@ -322,4 +427,33 @@ namespace csharp_gestore_eventi
 
     }
 
+    public class Conferenza : Evento
+    {
+        public string Relatore { get; set; }
+
+
+        //manipolazione prezzo con due tipi (string uscita, double ingresso)
+        private double _prezzo;
+        public string GetPrezzo()
+        {
+            string prezzoEuro = this._prezzo.ToString("0.00") + " " + "euro";
+            return prezzoEuro;
+        }
+        public void SetPrezzo(double price)
+        {
+            this._prezzo = price;
+        }
+
+        public Conferenza(string realtore, double price, string titolo, string date ) : base(titolo, date)
+        {
+            this.Relatore = realtore;
+            SetPrezzo(price);
+        }
+
+        public override string ToString()
+        {
+            string date = this.Date.ToString("dd/MM/yyyy");
+            return date + " - " + this.Titolo + " - " + this.Relatore + " - " + this.GetPrezzo();
+        }
+    }
 }
