@@ -9,8 +9,13 @@ namespace csharp_gestore_eventi
         static void Main(string[] args)
         {
             ProgrammaEventi nuovoEvento = CreaProgrammaEventi();
-            
 
+            Console.WriteLine($"In totale, il programma prevede {nuovoEvento.ListaEventi.Count()} eventi");
+
+            ProgrammaEventi.StampaTuttiEventiStatic(nuovoEvento.ListaEventi);
+            ProgrammaEventi.StampaTuttiEventiStatic(nuovoEvento.ListaEventoPerData());.
+
+            nuovoEvento.SvuotaLista();
 
             //dati di debug
             //Evento evento1 = new Evento("Coffee Vincit Omnia", "29/05/2023");
@@ -243,9 +248,11 @@ namespace csharp_gestore_eventi
         {
             this.ListaEventi.Add(ev);
         }
-        public void EventoPerData()
+        public List<Evento> ListaEventoPerData()
         {
             Console.WriteLine("Digita una data (gg/MM/yyyy) per visualizzare tutti gli eventi previsti per quella data: ");
+            
+            List<Evento> ListaPerData = new List<Evento>();
 
             //parametri ricerca
             DateTime dateFilter;
@@ -254,7 +261,7 @@ namespace csharp_gestore_eventi
                 Console.WriteLine("Digita una data nel formato valido");
 
             
-            //stampa a schermo eventi
+            //filtraggio eventi per data
             var eventoPerData = from evento in ListaEventi
                                 where evento.Date == dateFilter
                                 select evento;
@@ -267,10 +274,10 @@ namespace csharp_gestore_eventi
             {
                 foreach (var evat in eventoPerData)
                 {
-                    Console.WriteLine(evat.ToString());
+                    ListaPerData.Add(evat);
                 }
             }
-
+            return ListaPerData;
 
         }
         public static void StampaTuttiEventiStatic(List<Evento> ListaEventi)
